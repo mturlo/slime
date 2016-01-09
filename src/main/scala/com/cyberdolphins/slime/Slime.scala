@@ -1,19 +1,21 @@
-Slime
-============
+package com.cyberdolphins.slime
 
-Slack Bot Akka Actor
+import akka.actor.{ActorSystem, Props}
+import com.cyberdolphins.slime.SlackBotActor.{Close, Connect}
+import com.cyberdolphins.slime.incoming._
+import com.cyberdolphins.slime.outgoing._
 
-Usage:
+/**
+  * Created by mwielocha on 09/01/16.
+  */
 
-```scala
 class Slime extends SlackBotActor {
   override def eventReceive: EventReceive = {
 
     case Message("speak!", channel, user) =>
 
       publish(ComplexOutboundMessage("Spoken!", channel, user,
-        Attachment("The Expanse",
-            "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
+        Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
   }
 }
 
@@ -34,4 +36,3 @@ object Slime extends App {
 
   actorSystem.awaitTermination()
 }
-```
