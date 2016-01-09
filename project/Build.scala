@@ -16,7 +16,7 @@ object SlimeBuild extends Build {
 
   val projectDependencies = Seq(
     "org.java-websocket" % "Java-WebSocket" % V.javaWebsockets withSources(),
-    "com.typesafe.akka" %% "akka-actor" % V.akka % "provided" withSources(),
+    "com.typesafe.akka" %% "akka-actor" % V.akka withSources(),
     "com.typesafe.play" %% "play-json" % V.play withSources(),
     "com.typesafe.play" %% "play-ws" % V.play withSources(),
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
