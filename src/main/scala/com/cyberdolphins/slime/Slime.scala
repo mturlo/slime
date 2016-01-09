@@ -2,6 +2,9 @@ package com.cyberdolphins.slime
 
 import akka.actor.{Props, ActorSystem}
 import com.cyberdolphins.slime.SlackBotActor.{Close, Connect}
+import com.cyberdolphins.slime.outgoing.ComplexOutboundMessage
+import incoming._
+import outgoing._
 
 /**
   * Created by mwielocha on 09/01/16.
@@ -9,9 +12,11 @@ import com.cyberdolphins.slime.SlackBotActor.{Close, Connect}
 
 class Slime extends SlackBotActor {
   override def eventReceive: EventReceive = {
-    case incoming.Message("speak!", channel, user) =>
-      publish(outgoing.Message("Spoken!", channel, user,
-        outgoing.Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
+
+    case Message("speak!", channel, user) =>
+
+      publish(ComplexOutboundMessage("Spoken!", channel, user,
+        Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
   }
 }
 

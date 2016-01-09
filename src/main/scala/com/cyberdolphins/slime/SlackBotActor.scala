@@ -112,7 +112,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     webSocketActor ! WebSocketActor.Close
   }
 
-  private def httpPost(m: outgoing.Message, token: String): Future[Response] = {
+  private def httpPost(m: outgoing.ComplexOutboundMessage, token: String): Future[Response] = {
 
     log.info(s"httpPost: $m")
 
@@ -154,7 +154,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
   private def publishAsync(message: Future[Outbound], token: String) = {
     message.foreach {
-      case o: outgoing.Message => httpPost(o, token)
+      case o: outgoing.ComplexOutboundMessage => httpPost(o, token)
       case o: Outbound => webSocketPush(o)
     }
   }

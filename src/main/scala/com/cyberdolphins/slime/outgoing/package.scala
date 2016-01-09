@@ -45,7 +45,7 @@ package object outgoing {
     }
   }
 
-  case class SimpleMessage(
+  case class SimpleOutboundMessage(
     id: Option[Int],
     text: String,
     user: Option[String],
@@ -54,35 +54,35 @@ package object outgoing {
     override def stamp(id: Int): Outbound = copy(id = Some(id))
   }
 
-  object SimpleMessage {
+  object SimpleOutboundMessage {
 
-    def apply(text: String): SimpleMessage = {
-      new SimpleMessage(None, text, None, None)
+    def apply(text: String): SimpleOutboundMessage = {
+      new SimpleOutboundMessage(None, text, None, None)
     }
 
-    def apply(text: String, channel: String): SimpleMessage = {
-      new SimpleMessage(None, text, None, channel = Some(channel))
+    def apply(text: String, channel: String): SimpleOutboundMessage = {
+      new SimpleOutboundMessage(None, text, None, channel = Some(channel))
     }
 
-    def apply(text: String, channel: String, user: String): SimpleMessage = {
-      new SimpleMessage(None, text, user = Some(user), channel = Some(channel))
+    def apply(text: String, channel: String, user: String): SimpleOutboundMessage = {
+      new SimpleOutboundMessage(None, text, user = Some(user), channel = Some(channel))
     }
 
-    private val _writes: Writes[SimpleMessage] = {
+    private val _writes: Writes[SimpleOutboundMessage] = {
       ((__ \ "id").writeNullable[Int] ~
         (__ \ "text").write[String] ~
         (__ \ "user").writeNullable[String] ~
-        (__ \ "channel").writeNullable[String]) (unlift(SimpleMessage.unapply))
+        (__ \ "channel").writeNullable[String]) (unlift(SimpleOutboundMessage.unapply))
     }
 
-    implicit val writes = new Writes[SimpleMessage] {
-      override def writes(o: SimpleMessage): JsValue = {
+    implicit val writes = new Writes[SimpleOutboundMessage] {
+      override def writes(o: SimpleOutboundMessage): JsValue = {
         Json.toJson(o)(_writes).as[JsObject] ++ Json.obj("type" -> message)
       }
     }
   }
 
-  case class Message(
+  case class ComplexOutboundMessage(
     id: Option[Int],
     text: String,
     channel: String,
@@ -92,30 +92,30 @@ package object outgoing {
     override def stamp(id: Int): Outbound = copy(id = Some(id))
   }
 
-  object Message {
+  object ComplexOutboundMessage {
 
-    def apply(text: String, channel: String): Message = {
-      new Message(None, text, channel, None, None)
+    def apply(text: String, channel: String): ComplexOutboundMessage = {
+      new ComplexOutboundMessage(None, text, channel, None, None)
     }
 
-    def apply(text: String, channel: String, user: String): Message = {
-      new Message(None, text, channel, Some(user), None)
+    def apply(text: String, channel: String, user: String): ComplexOutboundMessage = {
+      new ComplexOutboundMessage(None, text, channel, Some(user), None)
     }
 
-    def apply(text: String, channel: String, user: String, attachments: Attachment*): Message = {
-      new Message(None, text, channel, Some(user), Some(attachments))
+    def apply(text: String, channel: String, user: String, attachments: Attachment*): ComplexOutboundMessage = {
+      new ComplexOutboundMessage(None, text, channel, Some(user), Some(attachments))
     }
 
-    private val _writes: Writes[Message] = {
+    private val _writes: Writes[ComplexOutboundMessage] = {
       ((__ \ "id").writeNullable[Int] ~
         (__ \ "text").write[String] ~
         (__ \ "channel").write[String] ~
         (__ \ "user").writeNullable[String] ~
-        (__ \ "user").writeNullable[Seq[Attachment]]) (unlift(Message.unapply))
+        (__ \ "user").writeNullable[Seq[Attachment]]) (unlift(ComplexOutboundMessage.unapply))
     }
 
-    implicit val writes = new Writes[Message] {
-      override def writes(o: Message): JsValue = {
+    implicit val writes = new Writes[ComplexOutboundMessage] {
+      override def writes(o: ComplexOutboundMessage): JsValue = {
         Json.toJson(o)(_writes).as[JsObject] ++ Json.obj("type" -> message)
       }
     }
@@ -149,8 +149,8 @@ package object outgoing {
     implicit val writes = new Writes[Outbound] {
       override def writes(o: Outbound): JsValue = {
         o match {
-          case o: SimpleMessage => Json.toJson(o)
-          case o: Message => Json.toJson(o)
+          case o: SimpleOutboundMessage => Json.toJson(o)
+          case o: ComplexOutboundMessage => Json.toJson(o)
           case o: Ping => Json.toJson(o)
         }
       }
