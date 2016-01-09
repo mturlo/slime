@@ -8,7 +8,7 @@ import play.api.libs.functional.syntax._
   */
 package object incoming {
 
-  case class RtmStartResponse(url: String, ok: Boolean)
+  case class RtmStartResponse(ok: Boolean, url: Option[String])
 
   object RtmStartResponse {
 

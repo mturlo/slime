@@ -175,6 +175,8 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
     outboundClass.isAssignableFrom(m.getClass)
   }
 
+  protected def format(payload: String): String = payload
+
   private class UnderlyingWebSocketClient(config: WebSocketConfig)
     extends WebSocketClient(new URI(config.serverUri), new Draft_10,
       config.headers, config.connectionTimeout.toSeconds.toInt) {

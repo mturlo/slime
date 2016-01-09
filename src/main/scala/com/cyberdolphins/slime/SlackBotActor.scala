@@ -21,6 +21,7 @@ import scala.concurrent.duration._
 
 import SlackBotActor._
 import outgoing._
+import common.Strings._
 
 import scala.util.{Failure, Success}
 
@@ -65,24 +66,41 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     override def webSocketReceive: WebSocketReceive = {
       case m => SlackBotActor.this.self ! m
     }
+
+    override protected def format(payload: String): String = {
+      super.format(payload).escape
+    }
+
+    onTransition {
+      case _ -> WebSocketActor.Connected => setupHeartbeat()
+    }
   }
 
   private val counter = new AtomicInteger(0)
   private def nextID: Int = counter.incrementAndGet()
 
-  private val webSocketActor = context.actorOf(Props(new SlackWebSocketActor))
+  private val webSocketActor = context.actorOf(Props(new SlackWebSocketActor), "websocket-actor")
 
   private val httpClientBuilder = new AsyncHttpClientConfig.Builder()
   private val httpClient = new NingWSClient(httpClientBuilder.build())
+
+  private def setupHeartbeat(): Unit = {
+    context.system.scheduler.schedule(5 seconds, 5 seconds) {
+      self ! Ping(None)
+    }
+  }
 
   private def connect(token: String, config: String => WebSocketConfig) = {
 
     httpClient.url(rtmStartUrl.format(token)).get().map { response =>
       response.json.validate[RtmStartResponse] match {
 
-        case JsSuccess(RtmStartResponse(wsUrl, true), _) =>
+        case JsSuccess(RtmStartResponse(true, Some(url)), _) =>
           log.info("Connecting to slack...")
-          webSocketActor ! WebSocketActor.Open(config(wsUrl))
+          webSocketActor ! WebSocketActor.Open(config(url))
+
+        case  JsSuccess(RtmStartResponse(false, None), _) =>
+          log.error("Error starting rtm")
 
         case JsError(_) =>
           log.error("Unexpected response from rtm")
@@ -100,11 +118,15 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
     val request = httpClient.url(chatPostMessageUrl)
 
+    val attachments = Json.toJson(m.attachments)
+      .toString.escape
+
     val futureResponse = request.post(Map(
-      "token"   -> Seq(token),
-      "channel" -> Seq(m.channel),
-      "text"    -> Seq(m.text),
-      "as_user" -> Seq("true")
+      "token"       -> Seq(token),
+      "channel"     -> Seq(m.channel),
+      "text"        -> Seq(m.text),
+      "as_user"     -> Seq("true"),
+      "attachments" -> Seq(attachments)
     ))
 
     futureResponse.onComplete {

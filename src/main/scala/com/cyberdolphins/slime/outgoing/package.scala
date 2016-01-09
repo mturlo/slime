@@ -86,7 +86,8 @@ package object outgoing {
     id: Option[Int],
     text: String,
     channel: String,
-    user: Option[String]) extends Outbound {
+    user: Option[String],
+    attachments: Option[Seq[Attachment]]) extends Outbound {
 
     override def stamp(id: Int): Outbound = copy(id = Some(id))
   }
@@ -94,24 +95,52 @@ package object outgoing {
   object Message {
 
     def apply(text: String, channel: String): Message = {
-      new Message(None, text, channel, None)
+      new Message(None, text, channel, None, None)
     }
 
     def apply(text: String, channel: String, user: String): Message = {
-      new Message(None, text, channel, Some(user))
+      new Message(None, text, channel, Some(user), None)
+    }
+
+    def apply(text: String, channel: String, user: String, attachments: Attachment*): Message = {
+      new Message(None, text, channel, Some(user), Some(attachments))
     }
 
     private val _writes: Writes[Message] = {
       ((__ \ "id").writeNullable[Int] ~
         (__ \ "text").write[String] ~
         (__ \ "channel").write[String] ~
-        (__ \ "user").writeNullable[String]) (unlift(Message.unapply))
+        (__ \ "user").writeNullable[String] ~
+        (__ \ "user").writeNullable[Seq[Attachment]]) (unlift(Message.unapply))
     }
 
     implicit val writes = new Writes[Message] {
       override def writes(o: Message): JsValue = {
         Json.toJson(o)(_writes).as[JsObject] ++ Json.obj("type" -> message)
       }
+    }
+  }
+
+  case class Attachment(text: Option[String], title: Option[String], titleLink: Option[String])
+
+  object Attachment {
+
+    def apply(text: String) = {
+      new Attachment(Some(text), None, None)
+    }
+
+    def apply(title: String, text: String) = {
+      new Attachment(Some(text), Some(title), None)
+    }
+
+    def apply(title: String, titleLink: String, text: String) = {
+      new Attachment(Some(text), Some(title), Some(titleLink))
+    }
+
+    implicit val writes = {
+      ((__ \ "text").writeNullable[String] ~
+        (__ \ "title").writeNullable[String] ~
+        (__ \ "title_link").writeNullable[String]) (unlift(Attachment.unapply))
     }
   }
 

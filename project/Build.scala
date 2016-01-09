@@ -31,7 +31,8 @@ object SlimeBuild extends Build {
     scalacOptions       := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-language:postfixOps"),
     fork in test := true,
     javaOptions in test += "-XX:MaxPermSize=512M -Xmx1024M -Xms1024M -Duser.timezone=UTC -Djava.library.path=/usr/local/lib",
-    resourceDirectory in Test <<= baseDirectory apply {(baseDir: File) => baseDir / "test" / "resources"}
+    resourceDirectory in Test <<= baseDirectory apply {(baseDir: File) => baseDir / "test" / "resources"},
+    mainClass in (Compile, run) := Some("com.cyberdolphins.slime.Slime")
   )
 
   val main = Project(projectName, file("."))
