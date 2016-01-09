@@ -1,6 +1,9 @@
-# slime
+Slime
+============
 
 Slack Bot Akka Actor
+
+Usage:
 
 ```scala
 class Slime extends SlackBotActor {
