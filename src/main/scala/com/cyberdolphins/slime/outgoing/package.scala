@@ -97,7 +97,7 @@ package object outgoing {
       new Message(None, text, channel, None)
     }
 
-    def apply(text: String, user: String,channel: String): Message = {
+    def apply(text: String, channel: String, user: String): Message = {
       new Message(None, text, channel, Some(user))
     }
 
