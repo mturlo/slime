@@ -3,20 +3,15 @@ package com.cyberdolphins.slime.ws
 import java.net.URI
 import javax.net.ssl.SSLContext
 
-import akka.actor.Actor.Receive
 import akka.actor._
-import akka.io.Tcp.Write
-import com.cyberdolphins.slime.ws.WebSocketActor
+import com.cyberdolphins.slime.ws.WebSocketActor._
 import org.java_websocket.client.{DefaultSSLWebSocketClientFactory, WebSocketClient}
 import org.java_websocket.drafts.Draft_10
 import org.java_websocket.handshake.ServerHandshake
 import play.api.libs.json._
 
-import scala.concurrent.duration.{FiniteDuration, Duration}
 import scala.collection.JavaConversions._
-import WebSocketActor._
-import scala.concurrent.duration._
-
+import scala.concurrent.duration.{FiniteDuration, _}
 import scala.reflect.ClassTag
 
 /**
@@ -91,7 +86,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
   startWith(Uninitialized, NoStateData)
 
   private def connect(config: WebSocketConfig) = {
-    log.info(s"Opening connection for $config")
+    log.debug(s"Opening connection for $config")
     stay() using ConnectedStateData(new UnderlyingWebSocketClient(config))
   }
 
@@ -110,7 +105,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
   when(Connected) {
 
     case Event(Send(m), ConnectedStateData(client)) if isOutboundValid(m) =>
-      log.info(s"Sending $m")
+      log.debug(s"Sending $m")
       send(m.asInstanceOf[Out], client)
       stay()
 
@@ -121,7 +116,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
 
     case Event(Received(m), ConnectedStateData(client)) if isInboundValid(m) =>
 
-      log.info(s"Received $m")
+      log.debug(s"Received $m")
 
       webSocketReceive(m.asInstanceOf[In])
       stay()
@@ -136,7 +131,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
       goto(Derailed) using DerailedStateData(ex)
 
     case Event(Close, ConnectedStateData(client)) =>
-      log.info("Closing connection")
+      log.debug("Closing connection")
       client.closeBlocking()
       stay()
 
@@ -162,7 +157,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
 
   private def send(out: Out, client: WebSocketClient) = {
     val payload = Json.toJson(out).toString
-    log.info(s"ws ->: $payload")
+    log.debug(s"ws ->: $payload")
     client.send(payload)
   }
 
@@ -196,7 +191,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
 
     override def onMessage(message: String): Unit = {
 
-      log.info(s"ws <-: $message")
+      log.debug(s"ws <-: $message")
 
       Json.parse(message).validate[In] match {
         case JsSuccess(m, _) => self ! Received(m)

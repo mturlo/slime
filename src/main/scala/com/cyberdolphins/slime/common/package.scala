@@ -1,7 +1,5 @@
 package com.cyberdolphins.slime
 
-import play.api.libs.json.JsValue
-
 /**
   * Created by mwielocha on 09/01/16.
   */

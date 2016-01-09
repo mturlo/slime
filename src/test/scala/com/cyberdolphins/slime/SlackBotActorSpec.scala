@@ -1,18 +1,8 @@
 package com.cyberdolphins.slime
 
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
-
-import akka.actor.{Props, Actor, ActorSystem}
-import com.cyberdolphins.slime.ws.WebSocketActor
-import com.cyberdolphins.slime.ws.WebSocketActor.{Open, Send, Received, Opened}
+import akka.actor.{ActorSystem, Props}
+import com.cyberdolphins.slime.SlackBotActor._
 import org.scalatest.WordSpec
-import play.api.libs.json.Json
-
-import scala.concurrent.ExecutionContext
-import scala.util.{Success, Failure}
-import SlackBotActor._
-import incoming._
 
 /**
   * Created by mwielocha on 07/01/16.

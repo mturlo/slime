@@ -1,28 +1,20 @@
 package com.cyberdolphins.slime
 
-import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor._
-import akka.actor.Actor.Receive
+import com.cyberdolphins.slime.SlackBotActor._
+import com.cyberdolphins.slime.common.Strings._
 import com.cyberdolphins.slime.incoming._
+import com.cyberdolphins.slime.outgoing._
 import com.cyberdolphins.slime.ws.WebSocketActor
 import com.cyberdolphins.slime.ws.WebSocketActor.WebSocketConfig
-import org.java_websocket.client.WebSocketClient
-import org.java_websocket.drafts.Draft_10
-import org.java_websocket.handshake.ServerHandshake
-import play.api.libs.json._
-import scala.collection.JavaConversions._
 import com.ning.http.client.AsyncHttpClientConfig
+import play.api.libs.json._
 import play.api.libs.ws.ning.NingWSClient
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration._
-
-import SlackBotActor._
-import outgoing._
-import common.Strings._
-
 import scala.util.{Failure, Success}
 
 /**
@@ -96,7 +88,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
       response.json.validate[RtmStartResponse] match {
 
         case JsSuccess(RtmStartResponse(true, Some(url)), _) =>
-          log.info("Connecting to slack...")
+          log.debug("Connecting to slack...")
           webSocketActor ! WebSocketActor.Open(config(url))
 
         case  JsSuccess(RtmStartResponse(false, None), _) =>
@@ -114,7 +106,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
   private def httpPost(m: outgoing.ComplexOutboundMessage, token: String): Future[Response] = {
 
-    log.info(s"httpPost: $m")
+    log.debug(s"httpPost: $m")
 
     val request = httpClient.url(chatPostMessageUrl)
 
@@ -130,7 +122,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     ))
 
     futureResponse.onComplete {
-      case Success(response) if response.status == 200 => log.info(response.body)
+      case Success(response) if response.status == 200 => log.debug(response.body)
       case Success(response) => log.warning(s"Non 200 response status: ${response.body}")
       case Failure(ex) => log.error(ex, "Error on posting message")
     }
@@ -142,7 +134,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
   private def webSocketPush(o: Outbound) = {
 
-    log.info(s"webSocketPush: $o")
+    log.debug(s"webSocketPush: $o")
 
     webSocketActor ! WebSocketActor.Send {
       o.id match {
@@ -185,6 +177,8 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
       goto(Disconnected) using NoStateData
 
     case Event(m: Outbound, Token(token)) => publish(m, token); stay()
+
+    case Event(Pong, _) => stay()
 
     case Event(m: incoming.Event, _) if eventReceive.isDefinedAt(m) => eventReceive(m); stay()
   }

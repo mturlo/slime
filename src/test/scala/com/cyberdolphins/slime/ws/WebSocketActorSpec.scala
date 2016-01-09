@@ -2,12 +2,10 @@ package com.cyberdolphins.slime.ws
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import akka.actor.Actor.Receive
-import akka.actor.{Props, Actor, ActorSystem}
-import com.cyberdolphins.slime.ws.WebSocketActor.Opened
+import akka.actor.{ActorSystem, Props}
+import com.cyberdolphins.slime.ws.WebSocketActor._
 import org.scalatest.WordSpec
-import play.api.libs.json.{Json, JsValue}
-import WebSocketActor._
+import play.api.libs.json.Json
 
 /**
   * Created by mwielocha on 07/01/16.

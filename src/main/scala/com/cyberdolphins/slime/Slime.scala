@@ -1,10 +1,9 @@
 package com.cyberdolphins.slime
 
-import akka.actor.{Props, ActorSystem}
+import akka.actor.{ActorSystem, Props}
 import com.cyberdolphins.slime.SlackBotActor.{Close, Connect}
-import com.cyberdolphins.slime.outgoing.ComplexOutboundMessage
-import incoming._
-import outgoing._
+import com.cyberdolphins.slime.incoming._
+import com.cyberdolphins.slime.outgoing._
 
 /**
   * Created by mwielocha on 09/01/16.
@@ -25,12 +24,12 @@ object Slime extends App {
 
   val actorSystem = ActorSystem()
 
-  val mySlackBotActor = actorSystem.actorOf(Props[Slime], "slime-bot")
+  val slimeBotActor = actorSystem.actorOf(Props[Slime], "slime-bot")
 
-  mySlackBotActor ! Connect(System.getenv("SLACK_API_KEY"))
+  slimeBotActor ! Connect(System.getenv("SLACK_API_KEY"))
 
   sys.addShutdownHook {
-    mySlackBotActor ! Close
+    slimeBotActor ! Close
     actorSystem.shutdown()
     actorSystem.awaitTermination()
   }

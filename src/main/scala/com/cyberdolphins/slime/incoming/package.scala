@@ -1,7 +1,7 @@
 package com.cyberdolphins.slime
 
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 /**
   * Created by mwielocha on 07/01/16.
