@@ -3,6 +3,8 @@ package com.cyberdolphins.slime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+import scala.util.Try
+
 /**
   * Created by mwielocha on 07/01/16.
   */
@@ -28,6 +30,8 @@ package object incoming {
 
     type EventType = Value
 
+    val unknown = Value("unknown")
+
     val hello          = Value("hello")
     val ping           = Value("ping")
     val pong           = Value("pong")
@@ -36,6 +40,69 @@ package object incoming {
     val presenceChange = Value("presence_change")
     val userTyping     = Value("user_typing")
     val filePublic     = Value("file_public")
+
+    val channel_marked = Value
+    val channel_created = Value
+    val channel_joined = Value
+    val channel_left = Value
+    val channel_deleted = Value
+    val channel_rename = Value
+    val channel_archive = Value
+    val channel_unarchive = Value
+    val channel_history_changed = Value
+    val dnd_updated = Value
+    val dnd_updated_user = Value
+    val im_created = Value
+    val im_open = Value
+    val im_close = Value
+    val im_marked = Value
+    val im_history_changed = Value
+    val group_joined = Value
+    val group_left = Value
+    val group_open = Value
+    val group_close = Value
+    val group_archive = Value
+    val group_unarchive = Value
+    val group_rename = Value
+    val group_marked = Value
+    val group_history_changed = Value
+    val file_created = Value
+    val file_shared = Value
+    val file_unshared = Value
+    val file_private = Value
+    val file_change = Value
+    val file_deleted = Value
+    val file_comment_added = Value
+    val file_comment_edited = Value
+    val file_comment_deleted = Value
+    val pin_added = Value
+    val pin_removed = Value
+    val manual_presence_change = Value
+    val pref_change = Value
+    val user_change = Value
+    val team_join = Value
+    val star_added = Value
+    val star_removed = Value
+    val reaction_added = Value
+    val reaction_removed = Value
+    val emoji_changed = Value
+    val commands_changed = Value
+    val team_plan_change = Value
+    val team_pref_change = Value
+    val team_rename = Value
+    val team_domain_change = Value
+    val email_domain_changed = Value
+    val team_profile_change = Value
+    val team_profile_delete = Value
+    val team_profile_reorder = Value
+    val bot_added = Value
+    val bot_changed = Value
+    val accounts_changed = Value
+    val team_migration_started = Value
+    val subteam_created = Value
+    val subteam_updated = Value
+    val subteam_self_added = Value
+    val subteam_self_removed = Value
 
     @transient
     implicit val writes = new Writes[EventType] {
@@ -47,7 +114,11 @@ package object incoming {
     @transient
     implicit val reads = new Reads[EventType] {
       override def reads(json: JsValue): JsResult[EventType] = {
-        JsSuccess(EventTypes.withName(json.as[JsString].value))
+        JsSuccess {
+          Try(EventTypes.withName(
+            json.as[JsString].value))
+            .getOrElse(unknown)
+        }
       }
     }
   }
