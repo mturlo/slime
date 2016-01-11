@@ -163,6 +163,10 @@ package object common {
 
   object Attachment {
 
+    def apply(fields: Field*) = {
+      new Attachment(None, None, None, Some(fields.toList), None, None, None)
+    }
+
     def apply(text: String) = {
       new Attachment(Some(text), None, None, None, None, None, None)
     }
