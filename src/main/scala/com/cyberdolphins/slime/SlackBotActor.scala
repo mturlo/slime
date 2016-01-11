@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor._
 import com.cyberdolphins.slime.SlackBotActor._
+import com.cyberdolphins.slime.common.{User, Channel}
 import com.cyberdolphins.slime.common.Strings._
 import com.cyberdolphins.slime.incoming._
 import com.cyberdolphins.slime.outgoing._
@@ -115,10 +116,10 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
     val futureResponse = request.post(Map(
       "token"       -> Seq(token),
-      "channel"     -> Seq(m.channel),
       "text"        -> Seq(m.text),
       "as_user"     -> Seq("true"),
-      "attachments" -> Seq(attachments)
+      "attachments" -> Seq(attachments),
+      "channel"     -> Seq(m.channel.name)
     ))
 
     futureResponse.onComplete {
@@ -159,8 +160,12 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     message.foreach(self ! _)
   }
 
-  def publish(message: Outbound) = {
+  def publish(message: Outbound): Unit = {
     publishAsync(Future.successful(message))
+  }
+
+  def publish(text: String, channel: Channel, user: User): Unit = {
+    publish(SimpleOutboundMessage(text, channel, user))
   }
 
   when(Disconnected) {
