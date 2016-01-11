@@ -6,14 +6,25 @@ Slack Bot Akka Actor
 Usage:
 
 ```scala
+import com.cyberdolphins.slime._
+import com.cyberdolphins.slime.SlackBotActor.{Close, Connect}
+import com.cyberdolphins.slime.incoming._
+import com.cyberdolphins.slime.outgoing._
+import com.cyberdolphins.slime.common._
+
 class Slime extends SlackBotActor {
   override def eventReceive: EventReceive = {
 
-    case Message("speak!", channel, user) =>
+    case SimpleInboundMessage("speak!", channel, user) =>
+
+      val fields = (1 to 10).map(i => Field(s"Field no. *$i*"))
 
       publish(ComplexOutboundMessage("Spoken!", channel, user,
-        Attachment("The Expanse",
-            "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
+        Attachment("A Attachment", "http://www.imdb.com/title/tt3230854/", "Woohoo!"),
+        Attachment("Another Attachment")
+        .withColor(Color.good)
+        .withFields(fields: _*)
+        .withMarkdownIn(MarkdownInValues.fields)))
   }
 }
 

@@ -19,8 +19,8 @@ class Slime extends SlackBotActor {
       val fields = (1 to 10).map(i => Field(s"Field no. *$i*"))
 
       publish(ComplexOutboundMessage("Spoken!", channel, user,
-        Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!"),
-        Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!")
+        Attachment("A Attachment", "http://www.imdb.com/title/tt3230854/", "Woohoo!"),
+        Attachment("Another Attachment")
         .withColor(Color.good)
         .withFields(fields: _*)
         .withMarkdownIn(MarkdownInValues.fields)))
