@@ -1,5 +1,6 @@
 package com.cyberdolphins.slime
 
+import com.cyberdolphins.slime.common._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -48,8 +49,8 @@ package object outgoing {
   case class SimpleOutboundMessage(
     id: Option[Int],
     text: String,
-    user: Option[String],
-    channel: Option[String]) extends Outbound {
+    channel: Option[Channel],
+    user: Option[User]) extends Outbound {
 
     override def stamp(id: Int): Outbound = copy(id = Some(id))
   }
@@ -60,19 +61,19 @@ package object outgoing {
       new SimpleOutboundMessage(None, text, None, None)
     }
 
-    def apply(text: String, channel: String): SimpleOutboundMessage = {
-      new SimpleOutboundMessage(None, text, None, channel = Some(channel))
+    def apply(text: String, channel: Channel): SimpleOutboundMessage = {
+      new SimpleOutboundMessage(id = None, text = text, user = None, channel = Some(channel))
     }
 
-    def apply(text: String, channel: String, user: String): SimpleOutboundMessage = {
+    def apply(text: String, channel: Channel, user: User): SimpleOutboundMessage = {
       new SimpleOutboundMessage(None, text, user = Some(user), channel = Some(channel))
     }
 
     private val _writes: Writes[SimpleOutboundMessage] = {
       ((__ \ "id").writeNullable[Int] ~
         (__ \ "text").write[String] ~
-        (__ \ "user").writeNullable[String] ~
-        (__ \ "channel").writeNullable[String]) (unlift(SimpleOutboundMessage.unapply))
+        (__ \ "channel").writeNullable[Channel] ~
+        (__ \ "user").writeNullable[User]) (unlift(SimpleOutboundMessage.unapply))
     }
 
     implicit val writes = new Writes[SimpleOutboundMessage] {
@@ -85,8 +86,8 @@ package object outgoing {
   case class ComplexOutboundMessage(
     id: Option[Int],
     text: String,
-    channel: String,
-    user: Option[String],
+    channel: Channel,
+    user: Option[User],
     attachments: Option[Seq[Attachment]]) extends Outbound {
 
     override def stamp(id: Int): Outbound = copy(id = Some(id))
@@ -94,53 +95,30 @@ package object outgoing {
 
   object ComplexOutboundMessage {
 
-    def apply(text: String, channel: String): ComplexOutboundMessage = {
+    def apply(text: String, channel: Channel): ComplexOutboundMessage = {
       new ComplexOutboundMessage(None, text, channel, None, None)
     }
 
-    def apply(text: String, channel: String, user: String): ComplexOutboundMessage = {
+    def apply(text: String, channel: Channel, user: User) = {
       new ComplexOutboundMessage(None, text, channel, Some(user), None)
     }
 
-    def apply(text: String, channel: String, user: String, attachments: Attachment*): ComplexOutboundMessage = {
+    def apply(text: String, channel: Channel, user: User, attachments: Attachment*): ComplexOutboundMessage = {
       new ComplexOutboundMessage(None, text, channel, Some(user), Some(attachments))
     }
 
     private val _writes: Writes[ComplexOutboundMessage] = {
       ((__ \ "id").writeNullable[Int] ~
         (__ \ "text").write[String] ~
-        (__ \ "channel").write[String] ~
-        (__ \ "user").writeNullable[String] ~
-        (__ \ "user").writeNullable[Seq[Attachment]]) (unlift(ComplexOutboundMessage.unapply))
+        (__ \ "channel").write[Channel] ~
+        (__ \ "user").writeNullable[User] ~
+        (__ \ "attachments").writeNullable[Seq[Attachment]]) (unlift(ComplexOutboundMessage.unapply))
     }
 
     implicit val writes = new Writes[ComplexOutboundMessage] {
       override def writes(o: ComplexOutboundMessage): JsValue = {
         Json.toJson(o)(_writes).as[JsObject] ++ Json.obj("type" -> message)
       }
-    }
-  }
-
-  case class Attachment(text: Option[String], title: Option[String], titleLink: Option[String])
-
-  object Attachment {
-
-    def apply(text: String) = {
-      new Attachment(Some(text), None, None)
-    }
-
-    def apply(title: String, text: String) = {
-      new Attachment(Some(text), Some(title), None)
-    }
-
-    def apply(title: String, titleLink: String, text: String) = {
-      new Attachment(Some(text), Some(title), Some(titleLink))
-    }
-
-    implicit val writes = {
-      ((__ \ "text").writeNullable[String] ~
-        (__ \ "title").writeNullable[String] ~
-        (__ \ "title_link").writeNullable[String]) (unlift(Attachment.unapply))
     }
   }
 

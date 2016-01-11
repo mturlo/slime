@@ -2,6 +2,7 @@ package com.cyberdolphins.slime
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import common._
 
 import scala.util.Try
 
@@ -32,77 +33,75 @@ package object incoming {
 
     val unknown = Value("unknown")
 
-    val hello          = Value("hello")
-    val ping           = Value("ping")
-    val pong           = Value("pong")
-    val message        = Value("message")
-    val error          = Value("error")
-    val presenceChange = Value("presence_change")
-    val userTyping     = Value("user_typing")
-    val filePublic     = Value("file_public")
-
-    val channel_marked = Value
-    val channel_created = Value
-    val channel_joined = Value
-    val channel_left = Value
-    val channel_deleted = Value
-    val channel_rename = Value
-    val channel_archive = Value
-    val channel_unarchive = Value
-    val channel_history_changed = Value
-    val dnd_updated = Value
-    val dnd_updated_user = Value
-    val im_created = Value
-    val im_open = Value
-    val im_close = Value
-    val im_marked = Value
-    val im_history_changed = Value
-    val group_joined = Value
-    val group_left = Value
-    val group_open = Value
-    val group_close = Value
-    val group_archive = Value
-    val group_unarchive = Value
-    val group_rename = Value
-    val group_marked = Value
-    val group_history_changed = Value
-    val file_created = Value
-    val file_shared = Value
-    val file_unshared = Value
-    val file_private = Value
-    val file_change = Value
-    val file_deleted = Value
-    val file_comment_added = Value
-    val file_comment_edited = Value
-    val file_comment_deleted = Value
-    val pin_added = Value
-    val pin_removed = Value
-    val manual_presence_change = Value
-    val pref_change = Value
-    val user_change = Value
-    val team_join = Value
-    val star_added = Value
-    val star_removed = Value
-    val reaction_added = Value
-    val reaction_removed = Value
-    val emoji_changed = Value
-    val commands_changed = Value
-    val team_plan_change = Value
-    val team_pref_change = Value
-    val team_rename = Value
-    val team_domain_change = Value
-    val email_domain_changed = Value
-    val team_profile_change = Value
-    val team_profile_delete = Value
-    val team_profile_reorder = Value
-    val bot_added = Value
-    val bot_changed = Value
-    val accounts_changed = Value
-    val team_migration_started = Value
-    val subteam_created = Value
-    val subteam_updated = Value
-    val subteam_self_added = Value
-    val subteam_self_removed = Value
+    val hello                = Value("hello")
+    val ping                 = Value("ping")
+    val pong                 = Value("pong")
+    val message              = Value("message")
+    val userTyping           = Value("user_typing")
+    val channelMarked        = Value("channel_marked")
+    val channelCreated       = Value("channel_created")
+    val channelJoined        = Value("channel_joined")
+    val channelLeft          = Value("channel_left")
+    val channelDeleted       = Value("channel_deleted")
+    val channelRename        = Value("channel_rename")
+    val channelArchive       = Value("channel_archive")
+    val channelUnarchive     = Value("channel_unarchive")
+    val channelHistoryChanged= Value("channel_history_changed")
+    val dndUpdated           = Value("dnd_updated")
+    val dndUpdatedUser       = Value("dnd_updated_user")
+    val imCreated            = Value("im_created")
+    val imOpen               = Value("im_open")
+    val imClose              = Value("im_close")
+    val imMarked             = Value("im_marked")
+    val imHistoryChanged     = Value("im_history_changed")
+    val groupJoined          = Value("group_joined")
+    val groupLeft            = Value("group_left")
+    val groupOpen            = Value("group_open")
+    val groupClose           = Value("group_close")
+    val groupArchive         = Value("group_archive")
+    val groupUnarchive       = Value("group_unarchive")
+    val groupRename          = Value("group_rename")
+    val groupMarked          = Value("group_marked")
+    val groupHistoryChanged  = Value("group_history_changed")
+    val fileCreated          = Value("file_created")
+    val fileShared           = Value("file_shared")
+    val fileUnshared         = Value("file_unshared")
+    val filePublic           = Value("file_public")
+    val filePrivate          = Value("file_private")
+    val fileChange           = Value("file_change")
+    val fileDeleted          = Value("file_deleted")
+    val fileCommentAdded     = Value("file_comment_added")
+    val fileCommentEdited    = Value("file_comment_edited")
+    val fileCommentDeleted   = Value("file_comment_deleted")
+    val pinAdded             = Value("pin_added")
+    val pinRemoved           = Value("pin_removed")
+    val presenceChange       = Value("presence_change")
+    val manualPresenceChange = Value("manual_presence_change")
+    val prefChange           = Value("pref_change")
+    val userChange           = Value("user_change")
+    val teamJoin             = Value("team_join")
+    val starAdded            = Value("star_added")
+    val starRemoved          = Value("star_removed")
+    val reactionAdded        = Value("reaction_added")
+    val reactionRemoved      = Value("reaction_removed")
+    val emojiChanged         = Value("emoji_changed")
+    val commandsChanged      = Value("commands_changed")
+    val teamPlanChange       = Value("team_plan_change")
+    val teamPrefChange       = Value("team_pref_change")
+    val teamRename           = Value("team_rename")
+    val teamDomainChange     = Value("team_domain_change")
+    val emailDomainChanged   = Value("email_domain_changed")
+    val teamProfileChange    = Value("team_profile_change")
+    val teamProfileDelete    = Value("team_profile_delete")
+    val teamProfileReorder   = Value("team_profile_reorder")
+    val botAdded             = Value("bot_added")
+    val botChanged           = Value("bot_changed")
+    val accountsChanged      = Value("accounts_changed")
+    val teamMigrationStarted = Value("team_migration_started")
+    val subteamCreated       = Value("subteam_created")
+    val subteamUpdated       = Value("subteam_updated")
+    val subteamSelfAdded     = Value("subteam_self_added")
+    val subteamSelfRemoved   = Value("subteam_self_removed")
 
     @transient
     implicit val writes = new Writes[EventType] {
@@ -116,6 +115,55 @@ package object incoming {
       override def reads(json: JsValue): JsResult[EventType] = {
         JsSuccess {
           Try(EventTypes.withName(
+            json.as[JsString].value))
+            .getOrElse(unknown)
+        }
+      }
+    }
+  }
+
+  object MessageSubtypes extends Enumeration {
+
+    type MessageSubtype = Value
+
+    val unknown = Value
+
+    val botMessage       = Value("bot_message")
+    val meMessage        = Value("me_message")
+    val messageChanged   = Value("message_changed")
+    val messageDeleted   = Value("message_deleted")
+    val channelJoin      = Value("channel_join")
+    val channelLeave     = Value("channel_leave")
+    val channelTopic     = Value("channel_topic")
+    val channelPurpose   = Value("channel_purpose")
+    val channelName      = Value("channel_name")
+    val channelArchive   = Value("channel_archive")
+    val channelUnarchive = Value("channel_unarchive")
+    val groupJoin        = Value("group_join")
+    val groupLeave       = Value("group_leave")
+    val groupTopic       = Value("group_topic")
+    val groupPurpose     = Value("group_purpose")
+    val groupName        = Value("group_name")
+    val groupArchive     = Value("group_archive")
+    val groupUnarchive   = Value("group_unarchive")
+    val fileShare        = Value("file_share")
+    val fileComment      = Value("file_comment")
+    val fileMention      = Value("file_mention")
+    val pinnedItem       = Value("pinned_item")
+    val unpinnedItem     = Value("unpinned_item")
+
+    @transient
+    implicit val writes = new Writes[MessageSubtype] {
+      override def writes(o: MessageSubtype): JsValue = {
+        JsString(o.toString)
+      }
+    }
+
+    @transient
+    implicit val reads = new Reads[MessageSubtype] {
+      override def reads(json: JsValue): JsResult[MessageSubtype] = {
+        JsSuccess {
+          Try(MessageSubtypes.withName(
             json.as[JsString].value))
             .getOrElse(unknown)
         }
@@ -160,17 +208,37 @@ package object incoming {
 
   case object Pong extends TypedEvent(EventTypes.pong)
 
-  case class Message(
+  case class SimpleInboundMessage(
     text: String,
-    channel: String,
-    user: String) extends TypedEvent(EventTypes.message)
+    channel: Channel,
+    user: User) extends TypedEvent(EventTypes.message)
 
-  object Message {
+  object SimpleInboundMessage {
 
     implicit val reads = {
       ((__ \ "text").read[String] ~
-        (__ \ "channel").read[String] ~
-        (__ \ "user").read[String]) (Message.apply _)
+        (__ \ "channel").read[Channel] ~
+        (__ \ "user").read[User]) (SimpleInboundMessage.apply _)
+    }
+  }
+
+  import MessageSubtypes._
+
+  case class ComplexInboundMessage(
+    id: Option[Int],
+    text: Option[String],
+    channel: Option[Channel],
+    user: Option[User],
+    subType: Option[MessageSubtype]) extends TypedEvent(EventTypes.message)
+
+  object ComplexInboundMessage {
+
+    implicit val reads: Reads[ComplexInboundMessage] = {
+      ((__ \ "id").readNullable[Int] ~
+        (__ \ "text").readNullable[String] ~
+        (__ \ "channel").readNullable[Channel] ~
+        (__ \ "user").readNullable[User] ~
+        (__ \ "subtype").readNullable[MessageSubtype]) (ComplexInboundMessage.apply _)
     }
   }
 
@@ -202,7 +270,12 @@ package object incoming {
           json.validate[TypedEvent] match {
             case JsSuccess(TypedEvent(EventTypes.hello), _) => Hello
             case JsSuccess(TypedEvent(EventTypes.pong), _) => Pong
-            case JsSuccess(TypedEvent(EventTypes.message), _) => json.as[Message]
+            case JsSuccess(TypedEvent(EventTypes.message), _) =>
+
+              json.validate[SimpleInboundMessage]
+                .getOrElse(json.as[ComplexInboundMessage]
+                  (ComplexInboundMessage.reads))
+
             case JsSuccess(in@TypedEvent(otherType), _) => in
             case JsError(_) => json.as[Posted]
           }

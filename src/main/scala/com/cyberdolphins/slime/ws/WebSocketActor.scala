@@ -115,9 +115,6 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
       stay()
 
     case Event(Received(m), ConnectedStateData(client)) if isInboundValid(m) =>
-
-      log.debug(s"Received $m")
-
       webSocketReceive(m.asInstanceOf[In])
       stay()
 
@@ -191,7 +188,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
 
     override def onMessage(message: String): Unit = {
 
-      log.debug(s"ws <-: $message")
+      log.info(s"ws <-: $message")
 
       Json.parse(message).validate[In] match {
         case JsSuccess(m, _) => self ! Received(m)
