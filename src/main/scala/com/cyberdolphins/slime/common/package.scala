@@ -146,7 +146,8 @@ package object common {
      fields: Option[List[Field]],
      markdown: Option[Boolean],
      color: Option[Color],
-     markdownIn: Option[List[MarkdownInValue]]) {
+     markdownIn: Option[List[MarkdownInValue]],
+     imageUrl: Option[String]) {
 
     def withFields(fields: Field*) = {
       copy(fields = Some(fields.toList))
@@ -159,43 +160,51 @@ package object common {
     def withMarkdownIn(values: MarkdownInValue*) = {
       copy(markdownIn = Some(values.toList))
     }
+
+    def withImageUrl(imageUrl: String): Attachment = {
+      copy(imageUrl = Some(imageUrl))
+    }
   }
 
   object Attachment {
 
+    def apply() = {
+      new Attachment(None, None, None, None, None, None, None, None)
+    }
+
     def apply(fields: Field*) = {
-      new Attachment(None, None, None, Some(fields.toList), None, None, None)
+      new Attachment(None, None, None, Some(fields.toList), None, None, None, None)
     }
 
     def apply(text: String) = {
-      new Attachment(Some(text), None, None, None, None, None, None)
+      new Attachment(Some(text), None, None, None, None, None, None, None)
     }
 
     def apply(title: String, text: String) = {
-      new Attachment(Some(text), Some(title), None, None, None, None, None)
+      new Attachment(Some(text), Some(title), None, None, None, None, None, None)
     }
 
     def apply(title: String, text: String, fields: Field*) = {
-      new Attachment(Some(text), Some(title), None, Some(fields.toList), None, None, None)
+      new Attachment(Some(text), Some(title), None, Some(fields.toList), None, None, None, None)
     }
 
     def apply(title: String, titleLink: String, text: String) = {
-      new Attachment(Some(text), Some(title), Some(titleLink), None, None, None, None)
+      new Attachment(Some(text), Some(title), Some(titleLink), None, None, None, None, None)
     }
 
     def apply(title: String, titleLink: String, text: String, markdown: Boolean) = {
       new Attachment(Some(text), Some(title),
-        Some(titleLink), None, Some(markdown), None, None)
+        Some(titleLink), None, Some(markdown), None, None, None)
     }
 
     def apply(title: String, titleLink: String, text: String, markdown: Boolean, color: Color) = {
       new Attachment(Some(text), Some(title),
-        Some(titleLink), None, Some(markdown), Some(color), None)
+        Some(titleLink), None, Some(markdown), Some(color), None, None)
     }
 
     def apply(title: String, titleLink: String, text: String, markdown: Boolean, color: Color, markdownIn: List[MarkdownInValue]) = {
       new Attachment(Some(text), Some(title),
-        Some(titleLink), None, Some(markdown), Some(color), Some(markdownIn))
+        Some(titleLink), None, Some(markdown), Some(color), Some(markdownIn), None)
     }
 
     implicit val writes = {
@@ -205,7 +214,8 @@ package object common {
         (__ \ "fields").writeNullable[List[Field]] ~
         (__ \ "mrkdwn").writeNullable[Boolean] ~
         (__ \ "color").writeNullable[Color] ~
-        (__ \ "mrkdwn_in").writeNullable[List[MarkdownInValue]]) (unlift(Attachment.unapply))
+        (__ \ "mrkdwn_in").writeNullable[List[MarkdownInValue]] ~
+        (__ \ "image_url").writeNullable[String]) (unlift(Attachment.unapply))
     }
   }
 }
