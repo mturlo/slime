@@ -161,7 +161,7 @@ package object common {
       copy(markdownIn = Some(values.toList))
     }
 
-    def withImageUrl(imageUrl: String): Unit = {
+    def withImageUrl(imageUrl: String): Attachment = {
       copy(imageUrl = Some(imageUrl))
     }
   }
