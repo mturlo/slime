@@ -103,6 +103,8 @@ package object incoming {
     val subteamSelfAdded     = Value("subteam_self_added")
     val subteamSelfRemoved   = Value("subteam_self_removed")
 
+    val reconnectUrl         = Value("reconnect_url")
+
     @transient
     implicit val writes = new Writes[EventType] {
       override def writes(o: EventType): JsValue = {
@@ -254,8 +256,8 @@ package object incoming {
 
     implicit val reads = new Reads[TypedEvent] {
       override def reads(json: JsValue): JsResult[TypedEvent] = {
-        (json \ "type").validate[String] match {
-          case JsSuccess(name, _) => JsSuccess(TypedEvent(EventTypes.withName(name)))
+        (json \ "type").validate[EventType] match {
+          case JsSuccess(eventType, _) => JsSuccess(TypedEvent(eventType))
           case JsError(e) => JsError(e)
         }
       }
