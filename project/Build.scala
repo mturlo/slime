@@ -12,7 +12,7 @@ object SlimeBuild extends Build {
   }
 
   val projectName         = "slime"
-  val projectVersion      = "0.1.3-SNAPSHOT"
+  val projectVersion      = "0.1.4-SNAPSHOT"
 
   val projectDependencies = Seq(
     "org.java-websocket" % "Java-WebSocket" % V.javaWebsockets withSources(),

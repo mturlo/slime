@@ -188,3 +188,9 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     case Event(m: incoming.Event, _) if eventReceive.isDefinedAt(m) => eventReceive(m); stay()
   }
 }
+
+class OutgoingOnlySlackBotActor extends SlackBotActor {
+  override def eventReceive: EventReceive = {
+    case _ => Unit
+  }
+}

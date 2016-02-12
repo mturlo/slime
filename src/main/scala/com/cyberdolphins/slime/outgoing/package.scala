@@ -91,12 +91,20 @@ package object outgoing {
     attachments: Option[Seq[Attachment]]) extends Outbound {
 
     override def stamp(id: Int): Outbound = copy(id = Some(id))
+
+    def withAttachments(attachments: Attachment*): ComplexOutboundMessage = {
+      copy(attachments = Some(attachments))
+    }
   }
 
   object ComplexOutboundMessage {
 
     def apply(text: String, channel: Channel): ComplexOutboundMessage = {
       new ComplexOutboundMessage(None, text, channel, None, None)
+    }
+
+    def apply(text: String, channel: Channel, attachments: Attachment*): ComplexOutboundMessage = {
+      new ComplexOutboundMessage(None, text, channel, None, Some(attachments))
     }
 
     def apply(text: String, channel: Channel, user: User) = {
