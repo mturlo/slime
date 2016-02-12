@@ -14,11 +14,12 @@ package object common {
 
     implicit class HttpSafeString(underlying: String) {
 
-      def escape = underlying.toString()
-        .replaceAllLiterally("&", "&amp;")
-        .replaceAllLiterally("<", "&lt;")
-        .replaceAllLiterally(">", "&gt;")
-
+      def escape = {
+        underlying.toString()
+          .replaceAllLiterally("&", "&amp;")
+          .replaceAllLiterally("<", "&lt;")
+          .replaceAllLiterally(">", "&gt;")
+      }
     }
   }
 

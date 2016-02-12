@@ -22,7 +22,6 @@ import scala.util.{Failure, Success}
   * Created by mwielocha on 07/01/16.
   */
 
-
 object SlackBotActor {
 
   sealed trait SlackBotActorState
@@ -31,13 +30,20 @@ object SlackBotActor {
 
   sealed trait SlackBotActorStateData
   case object NoStateData extends SlackBotActorStateData
-  case class Token(token: String) extends SlackBotActorStateData
+  case class ConnectedState(token: String, config: SlackBotConfig)
+    extends SlackBotActorStateData
+
+  case class SlackBotConfig(autoEscape: Boolean = true)
 
   sealed trait SlackBotActorMessage
 
   type LazyWebSocketConfig = String => WebSocketConfig
 
-  case class Connect(token: String, config: LazyWebSocketConfig = WebSocketConfig(_)) extends SlackBotActorMessage
+  case class Connect(token: String,
+                     slackBotConfig: SlackBotConfig = SlackBotConfig(autoEscape = true),
+                     webSocketConfig: LazyWebSocketConfig = WebSocketConfig(_))
+    extends SlackBotActorMessage
+
   case object Close extends SlackBotActorMessage
 
 }
@@ -61,7 +67,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     }
 
     override protected def format(payload: String): String = {
-      super.format(payload).escape
+      SlackBotActor.this.format(super.format(payload))
     }
 
     onTransition {
@@ -105,14 +111,22 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     webSocketActor ! WebSocketActor.Close
   }
 
+  private def format(in: String): String = {
+    stateData match {
+      case ConnectedState(_, config) if config.autoEscape => in.escape
+      case _ => in
+    }
+  }
+
   private def httpPost(m: outgoing.ComplexOutboundMessage, token: String): Future[Response] = {
 
     log.debug(s"httpPost: $m")
 
     val request = httpClient.url(chatPostMessageUrl)
 
-    val attachments = Json.toJson(m.attachments)
-      .toString.escape
+    val attachments = format {
+      Json.toJson(m.attachments).toString()
+    }
 
     val futureResponse = request.post(Map(
       "token"       -> Seq(token),
@@ -170,9 +184,9 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
   when(Disconnected) {
 
-    case Event(SlackBotActor.Connect(token, config), _) =>
-      connect(token, config)
-      goto(Connected) using Token(token)
+    case Event(SlackBotActor.Connect(token, slackBotConfig, webSocketConfig), _) =>
+      connect(token, webSocketConfig)
+      goto(Connected) using ConnectedState(token, slackBotConfig)
   }
 
   when(Connected) {
@@ -181,7 +195,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
       close()
       goto(Disconnected) using NoStateData
 
-    case Event(m: Outbound, Token(token)) => publish(m, token); stay()
+    case Event(m: Outbound, ConnectedState(token, slackBotConfig)) => publish(m, token); stay()
 
     case Event(Pong, _) => stay()
 
