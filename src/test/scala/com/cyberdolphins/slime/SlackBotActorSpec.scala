@@ -19,7 +19,7 @@ class SlackBotActorSpec extends WordSpec {
         override def eventReceive: EventReceive = {
           case incoming.SimpleInboundMessage("speak!", channel, user) =>
             publish(outgoing.ComplexOutboundMessage("Spoken!", channel, user,
-              outgoing.Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
+              common.Attachment("The Expanse", "http://www.imdb.com/title/tt3230854/", "Woohoo!")))
         }
       }
 

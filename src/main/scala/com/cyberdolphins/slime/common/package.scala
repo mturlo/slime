@@ -45,7 +45,7 @@ package object common {
     implicit val reads = new Reads[User] {
       override def reads(json: JsValue): JsResult[User] = {
         JsSuccess(User(json.as[String]))
-      }
+     }
     }
 
     implicit val writes = new Writes[User] {
