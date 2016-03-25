@@ -26,7 +26,7 @@ object WebSocketActor {
 
   case class Closed(code: Int, reason: String, remote: Boolean) extends WebSocketMessage
 
-  case class Opened(httpStatus: Short, httpStatusMessage: String) extends WebSocketMessage
+  case class Opened(httpStatusCode: Short, httpStatusMessage: String) extends WebSocketMessage
 
   case class Received(payload: Any) extends WebSocketMessage
 

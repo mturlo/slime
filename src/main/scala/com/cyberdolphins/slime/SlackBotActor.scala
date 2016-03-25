@@ -19,8 +19,8 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 /**
-  * Created by mwielocha on 07/01/16.
-  */
+ * Created by mwielocha on 07/01/16.
+ */
 
 object SlackBotActor {
 
@@ -39,9 +39,11 @@ object SlackBotActor {
 
   type LazyWebSocketConfig = String => WebSocketConfig
 
-  case class Connect(token: String,
-                     slackBotConfig: SlackBotConfig = SlackBotConfig(autoEscape = true),
-                     webSocketConfig: LazyWebSocketConfig = WebSocketConfig(_))
+  case class Connect(
+    token: String,
+    slackBotConfig: SlackBotConfig = SlackBotConfig(autoEscape = true),
+    webSocketConfig: LazyWebSocketConfig = WebSocketConfig(_)
+  )
     extends SlackBotActorMessage
 
   case object Close extends SlackBotActorMessage
@@ -98,7 +100,7 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
           log.debug("Connecting to slack...")
           webSocketActor ! WebSocketActor.Open(config(url))
 
-        case  JsSuccess(RtmStartResponse(false, None), _) =>
+        case JsSuccess(RtmStartResponse(false, None), _) =>
           log.error("Error starting rtm")
 
         case JsError(_) =>
@@ -129,11 +131,11 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
     }
 
     val futureResponse = request.post(Map(
-      "token"       -> Seq(token),
-      "text"        -> Seq(m.text),
-      "as_user"     -> Seq("true"),
+      "token" -> Seq(token),
+      "text" -> Seq(m.text),
+      "as_user" -> Seq("true"),
       "attachments" -> Seq(attachments),
-      "channel"     -> Seq(m.channel.name)
+      "channel" -> Seq(m.channel.name)
     ))
 
     futureResponse.onComplete {
@@ -195,7 +197,8 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
       close()
       goto(Disconnected) using NoStateData
 
-    case Event(m: Outbound, ConnectedState(token, slackBotConfig)) => publish(m, token); stay()
+    case Event(m: Outbound, ConnectedState(token, slackBotConfig)) =>
+      publish(m, token); stay()
 
     case Event(Pong, _) => stay()
 
