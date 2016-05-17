@@ -90,7 +90,7 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
   startWith(Uninitialized, NoStateData)
 
   private def connect(config: WebSocketConfig) = {
-    log.debug(s"Opening connection for $config")
+    log.info(s"Opening connection for $config")
     stay() using ConnectedStateData(new UnderlyingWebSocketClient(config))
   }
 
@@ -187,7 +187,10 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
     for {
       proxyHost <- config.proxyHost
       proxyPort <- config.proxyPort
-    } setProxy(new InetSocketAddress(proxyHost, proxyPort))
+    } {
+      log.info(s"Setting up proxy: $proxyHost:$proxyPort")
+      setProxy(new InetSocketAddress(proxyHost, proxyPort))
+    }
 
     connectBlocking()
 
