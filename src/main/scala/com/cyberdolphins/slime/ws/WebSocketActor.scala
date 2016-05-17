@@ -13,6 +13,8 @@ import play.api.libs.json._
 import scala.collection.JavaConversions._
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.reflect.ClassTag
+import java.net.InetSocketAddress
+
 
 /**
   * Created by mwielocha on 07/01/16.
@@ -35,12 +37,14 @@ object WebSocketActor {
   case class WebSocketConfig(
     serverUri: String,
     headers: Map[String, String],
-    connectionTimeout: FiniteDuration)
+    connectionTimeout: FiniteDuration,
+    proxyHost: Option[String],
+    proxyPort: Option[Int])
 
   object WebSocketConfig {
 
     def apply(serverUri: String): WebSocketConfig = {
-      new WebSocketConfig(serverUri, Map.empty, 1 second)
+      new WebSocketConfig(serverUri, Map.empty, 1 second, None, None)
     }
   }
 
@@ -179,6 +183,11 @@ abstract class WebSocketActor[In : Reads : ClassTag, Out : Writes : ClassTag] ex
       setWebSocketFactory(
         new DefaultSSLWebSocketClientFactory(sslContext))
     }
+
+    for {
+      proxyHost <- config.proxyHost
+      proxyPort <- config.proxyPort
+    } setProxy(new InetSocketAddress(proxyHost, proxyPort))
 
     connectBlocking()
 

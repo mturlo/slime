@@ -18,6 +18,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
+import com.ning.http.client.ProxyServer
+
 /**
  * Created by mwielocha on 07/01/16.
  */
@@ -33,6 +35,8 @@ object SlackBotActor {
   case class ConnectedState(token: String, config: SlackBotConfig)
     extends SlackBotActorStateData
 
+  case class ProxyConfig(proxyHost: String, proxyPort: Int)
+
   case class SlackBotConfig(autoEscape: Boolean = true)
 
   sealed trait SlackBotActorMessage
@@ -47,10 +51,10 @@ object SlackBotActor {
     extends SlackBotActorMessage
 
   case object Close extends SlackBotActorMessage
-
+  
 }
 
-abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateData] with ActorLogging {
+abstract class SlackBotActor(val proxyConfig: Option[ProxyConfig] = None) extends FSM[SlackBotActorState, SlackBotActorStateData] with ActorLogging {
 
   startWith(Disconnected, NoStateData)
 
@@ -82,7 +86,10 @@ abstract class SlackBotActor extends FSM[SlackBotActorState, SlackBotActorStateD
 
   private val webSocketActor = context.actorOf(Props(new SlackWebSocketActor), "websocket-actor")
 
-  private val httpClientBuilder = new AsyncHttpClientConfig.Builder()
+  private val httpClientBuilder = proxyConfig.foldLeft(new AsyncHttpClientConfig.Builder()) {
+    case (builder, ProxyConfig(host, port)) => builder.setProxyServer(new ProxyServer(host, port))
+  }
+
   private val httpClient = new NingWSClient(httpClientBuilder.build())
 
   private def setupHeartbeat(): Unit = {
